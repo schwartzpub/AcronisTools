@@ -6,12 +6,14 @@ Powershell Tools for Acronis
 ### Microsoft Secret Store
 AcronisTools uses the Microsoft Secret Store to securely store credentials and tokens for Acronis tenants.  In order to use this tool, you must first install the appropriate modules and configure your secret store.
 
-First, install the Secret Store module:
+First, install the required modules:
 ```
-Install-Module Microsoft.PowerShell.SecretStore
+Install-Module -Name "Microsoft.PowerShell.SecretManagement" -AllowPrerelease
+Install-Module -Name "Microsoft.PowerShell.SecretStore" -AllowPrerelease
 ```
 
-Then, configure your Secret Store
+Then, configure two vaults.  One will store your Acronis credentials, and one will store your Acronis API Tokens. You can name these whatever you like, the AcronisTools module will ask you to provide the names at runtime.
 ```
-Set-SecretStoreContiguration
+Register-SecretVault -Name "AcronisCredentials" -ModuleName "Microsoft.PowerShell.SecretStore"
+Register-SecretVault -Name "AcronisTokens" -ModuleName "Microsoft.PowerShell.SecretStore"
 ```
