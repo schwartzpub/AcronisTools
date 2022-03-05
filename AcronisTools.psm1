@@ -1,9 +1,9 @@
-function Get-AcronisSecretStore {
+function Get-AcronisSecretVault {
     <#
     .SYNOPSIS
-        Gets a Powershell Secret Store used for Acronis Tools.
+        Gets a Powershell Secret Vault used for Acronis Tools.
     .DESCRIPTION
-        Gets secret store used for logging into Acronis.
+        Gets secret vault used for logging into Acronis.
     #>
     [CmdletBinding()]
     param(
@@ -11,15 +11,56 @@ function Get-AcronisSecretStore {
         [string]$Name
     )
 
-    if(-not (Get-Module Microsoft.PowerShell.SecretManagement)){
-        Write-Error "You do not have Microsoft.PowerShell.SecretManagement (required) installed, would you like to install it now?"
+    if (-not (Get-SecretVault -Name $Name -ErrorAction SilentlyContinue)){
+        Write-Warning "Secret Vault ($($Name)) does not exist. These are the secret vaults available: "
+        Get-SecretVault
+    }
+    else {
+        Unlock-SecretVault -Name $Name
+    }
+}
+
+function Get-AcronisSecret {
+        <#
+    .SYNOPSIS
+        Gets a Powershell Secret  used for Acronis Tools.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name,
+        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Vault
+    )
+
+    if (-not (Get-Secret -Vault $Vault -Name $Name -ErrorAction SilentlyContinue)){
+        Write-Warning "Secret ($($Name)) does not exist. These are the secrets available: "
+        Get-SecretInfo -Vault $Vault
+        return
     }
 
-    if(-not (Get-Module Microsoft.PowerShell.SecretStore)){
-        Write-Error "You do not have Microsoft.PowerShell.SecretStore (required) installed, would you like to install it now?"
+    if ($null -eq (Get-SecretInfo -Name $Name).Metadata.clientid){
+        Write-Warning "Secret ($($Name)) does not contain a client id and cannot be used to access Acronis API. Please ensure your secret contains the metadata for clientid."
+        return
     }
 
-    if (-not (Get-SecretInfo -Name $Name)){
-        Write-Error "Secret store ($($Name)) does not exist."
+    else {
+        $thisSecret = [PSCustomObject]@{
+            Name = $Name
+            ClientID = (Get-SecretInfo -Name $name).Metadata.clientid
+            ClientSecret = Get-Secret -Name $Name
+        }
+        return $thisSecret
+    }
+}
+
+function Get-AcronisLogins {
+    $acronisVault = Read-Host "Please enter Vault name to unlock: "
+    Get-AcronisSecretVault $acronisVault
+
+    foreach ($secret in (Get-SecretInfo -Vault $acronisVault)){
+        Get-AcronisSecret -Name $secret.Name -Vault $acronisVault
     }
 }
