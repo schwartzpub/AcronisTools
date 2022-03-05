@@ -21,7 +21,7 @@ function Get-AcronisSecretVault {
 }
 
 function Get-AcronisSecret {
-        <#
+    <#
     .SYNOPSIS
         Gets a Powershell Secret  used for Acronis Tools.
     .DESCRIPTION
@@ -56,9 +56,35 @@ function Get-AcronisSecret {
     }
 }
 
+function New-AcronisSecretVault {
+    <#
+    .SYNOPSIS
+        Creates a new PowerShell Secret Vault for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name
+    )
+
+    Register-SecretVault -Name $Name -ModuleName Microsoft.PowerShell.SecretStore 
+}
+
 function Get-AcronisLogins {
-    $acronisVault = Read-Host "Please enter Vault name to unlock: "
-    Get-AcronisSecretVault $acronisVault
+    $acronisVault = Read-Host "Please enter Vault name to unlock or type 'new' to create a new vault: "
+
+    if ($acronisVault -ne "new"){
+        Get-AcronisSecretVault $acronisVault
+    }
+    else {
+        $vaultName = Read-Host "Please enter a name for your new Acronis Secrets Vault: "
+        $newVault = New-AcronisSecretVault -Name $vaultName
+
+        Get-AcronisSecretVault $vaultName
+        $acronisVault = $vaultName
+    }
 
     foreach ($secret in (Get-SecretInfo -Vault $acronisVault)){
         Get-AcronisSecret -Name $secret.Name -Vault $acronisVault
