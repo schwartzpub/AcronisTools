@@ -20,6 +20,22 @@ function Get-AcronisSecretVault {
     }
 }
 
+function New-AcronisSecretVault {
+    <#
+    .SYNOPSIS
+        Creates a new PowerShell Secret Vault for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name
+    )
+
+    Register-SecretVault -Name $Name -ModuleName Microsoft.PowerShell.SecretStore 
+}
+
 function Get-AcronisSecret {
     <#
     .SYNOPSIS
@@ -56,22 +72,6 @@ function Get-AcronisSecret {
     }
 }
 
-function New-AcronisSecretVault {
-    <#
-    .SYNOPSIS
-        Creates a new PowerShell Secret Vault for Acronis Secrets.
-    .DESCRIPTION
-        Gets secret used for logging into Acronis.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [string]$Name
-    )
-
-    Register-SecretVault -Name $Name -ModuleName Microsoft.PowerShell.SecretStore 
-}
-
 function New-AcronisSecret {
     <#
     .SYNOPSIS
@@ -88,7 +88,9 @@ function New-AcronisSecret {
         [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
         [string]$ClientID,
         [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [string]$ClientSecret
+        [string]$ClientSecret,
+        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$BaseUri
     )
 
     if (-not (Get-SecretVault -Name $Vault -ErrorAction SilentlyContinue)){
@@ -118,7 +120,9 @@ function Set-AcronisSecret {
         [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
         [string]$ClientID,
         [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$ClientSecret
+        [string]$ClientSecret,
+        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$BaseUri
     )
 
     if (-not (Get-SecretVault -Name $Vault -ErrorAction SilentlyContinue)){
@@ -136,6 +140,127 @@ function Set-AcronisSecret {
         Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret -Metadata @{clientid=$ClientID}
     }
 }
+
+function Get-AcronisTenant {
+    <#
+    .SYNOPSIS
+        Sets a new PowerShell Secret Vault for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name,
+        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Vault,
+        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientID,
+        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientSecret,
+        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$BaseUri
+    )
+
+}
+
+function Get-AcronisToken {
+    <#
+    .SYNOPSIS
+        Sets a new PowerShell Secret Vault for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name,
+        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Vault,
+        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientID,
+        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientSecret,
+        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$BaseUri
+    )
+
+}
+
+function Set-AcronisToken {
+    <#
+    .SYNOPSIS
+        Sets a new PowerShell Secret Vault for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name,
+        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Vault,
+        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientID,
+        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientSecret,
+        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$BaseUri
+    )
+
+}
+
+function New-AcronisToken {
+    <#
+    .SYNOPSIS
+        Sets a new PowerShell Secret Vault for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name,
+        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Vault,
+        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientID,
+        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientSecret,
+        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$BaseUri
+    )
+
+}
+
+function Find-AcronisClient {
+    <#
+    .SYNOPSIS
+        Sets a new PowerShell Secret Vault for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name,
+        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Vault,
+        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientID,
+        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientSecret,
+        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$BaseUri
+    )
+
+}
+
 function Get-AcronisLogins {
     $acronisVault = Read-Host "Please enter Vault name to unlock or type 'new' to create a new vault: "
 
