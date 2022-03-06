@@ -11,12 +11,19 @@ function Get-AcronisSecretVault {
         [string]$Name
     )
 
-    if (-not (Get-SecretVault -Name $Name -ErrorAction SilentlyContinue)){
-        Write-Warning "Secret Vault ($($Name)) does not exist. These are the secret vaults available: "
-        Get-SecretVault
+    BEGIN {
+        if (-not (Get-SecretVault -Name $Name -ErrorAction SilentlyContinue)){
+            Write-Warning "Secret Vault ($($Name)) does not exist. These are the secret vaults available: "
+            Get-SecretVault
+        }
     }
-    else {
-        Unlock-SecretVault -Name $Name
+    PROCESS {
+        if ((Get-SecretVault -Name $Name -ErrorAction SilentlyContinue)){
+            Unlock-SecretVault -Name $Name
+        }
+    }
+    END{
+
     }
 }
 
@@ -32,8 +39,11 @@ function New-AcronisSecretVault {
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
         [string]$Name
     )
-
-    Register-SecretVault -Name $Name -ModuleName Microsoft.PowerShell.SecretStore 
+    BEGIN {}
+    PROCESS {
+        Register-SecretVault -Name $Name -ModuleName Microsoft.PowerShell.SecretStore 
+    }
+    END {}
 }
 
 function Get-AcronisSecret {
@@ -51,25 +61,35 @@ function Get-AcronisSecret {
         [string]$Vault
     )
 
-    if (-not (Get-Secret -Vault $Vault -Name $Name -ErrorAction SilentlyContinue)){
-        Write-Warning "Secret ($($Name)) does not exist. These are the secrets available: "
-        Get-SecretInfo -Vault $Vault
-        return
-    }
-
-    if ($null -eq (Get-SecretInfo -Name $Name).Metadata.clientid){
-        Write-Warning "Secret ($($Name)) does not contain a client id and cannot be used to access Acronis API. Please ensure your secret contains the metadata for clientid."
-        return
-    }
-
-    else {
-        $thisSecret = [PSCustomObject]@{
-            Name = $Name
-            ClientID = (Get-SecretInfo -Name $name).Metadata.clientid
-            ClientSecret = Get-Secret -Name $Name
+    BEGIN {}
+    PROCESS {
+        if (-not (Get-Secret -Vault $Vault -Name $Name -ErrorAction SilentlyContinue)){
+            Write-Warning "Secret ($($Name)) does not exist. These are the secrets available: "
+            Get-SecretInfo -Vault $Vault
+            return
         }
-        return $thisSecret
+
+        if ($null -eq (Get-SecretInfo -Name $Name).Metadata.clientid){
+            Write-Warning "Secret ($($Name)) does not contain a client id and cannot be used to access Acronis API. Please ensure your secret contains the metadata for clientid."
+            return
+        }
+
+        if ($null -eq (Get-SecretInfo -Name $Name).Metadata.baseuri){
+            Write-Warning "Secret ($($Name)) does not contain a Base Uri and cannot be used to access Acronis API. Please ensure your secret contains the metadata for Base Uri."
+            return
+        }
+
+        else {
+            $thisSecret = [PSCustomObject]@{
+                Name = $Name
+                ClientID = (Get-SecretInfo -Name $name).Metadata.clientid
+                ClientSecret = Get-Secret -Name $Name
+                BaseUri = (Get-SecretInfo -Name $name).Metadata.baseuri
+            }
+            return $thisSecret
+        }
     }
+    END {}
 }
 
 function New-AcronisSecret {
@@ -93,14 +113,18 @@ function New-AcronisSecret {
         [string]$BaseUri
     )
 
-    if (-not (Get-SecretVault -Name $Vault -ErrorAction SilentlyContinue)){
-        Write-Warning "Secret Vault ($($Vault)) does not exist. These are the secret vaults available: "
-        Get-SecretVault
-        return
+    BEGIN {}
+    PROCESS {
+        if (-not (Get-SecretVault -Name $Vault -ErrorAction SilentlyContinue)){
+            Write-Warning "Secret Vault ($($Vault)) does not exist. These are the secret vaults available: "
+            Get-SecretVault
+            return
+        }
+        else {
+            Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret -Metadata @{clientid=$ClientID;baseuri=$BaseUri}
+        }
     }
-    else {
-        Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret -Metadata @{clientid=$ClientID}
-    }
+    END {}
 }
 
 function Set-AcronisSecret {
@@ -113,7 +137,6 @@ function Set-AcronisSecret {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
         [string]$Name,
         [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
         [string]$Vault,
@@ -124,20 +147,42 @@ function Set-AcronisSecret {
         [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
         [string]$BaseUri
     )
+    BEGIN {
+        $metadata = @{}
+        $secret = ''
 
-    if (-not (Get-SecretVault -Name $Vault -ErrorAction SilentlyContinue)){
-        Write-Warning "Secret Vault ($($Vault)) does not exist. These are the secret vaults available: "
-        Get-SecretVault
-        return
+        if ($PSBoundParameters.ContainsKey('ClientID')){
+            $metadata['clientid'] = $ClientID
+        }
+
+        if ($PSBoundParameters.ContainsKey('BaseUri')){
+            $metadata['baseuri'] = $BaseUri
+        }
+
+        if ($PSBoundParameters.ContainsKey('ClientSecret')){
+            $secret = $ClientSecret
+        }
     }
-    elseif ($ClientID -ne $null -and $ClientSecret -eq $null) {
-        Set-Secret -Vault $Vault -Name $Name -Metadata @{clientid=$ClientID}
+    PROCESS {
+        if (-not (Get-SecretVault -Name $Vault -ErrorAction SilentlyContinue)){
+            Write-Warning "Secret Vault ($($Vault)) does not exist. These are the secret vaults available: "
+            Get-SecretVault
+            return
+        }
+        else {
+            if (-not $metadata -and $clientsecret) {
+                Set-Secret -Vault $Vault -Name $Name -Metadata $metadata
+            }
+            elseif (-not $ClientSecret -and $metadata) {
+                Set-Secret -Vault $Vault -Name $Name -Secret $secret
+            }
+            else {
+                Set-Secret -Vault $Vault -Name $Name -Secret $secret -Metadata $metadata
+            }
+        }
     }
-    elseif ($ClientID -eq $null -and $ClientSecret -ne $null) {
-        Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret
-    }
-    else {
-        Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret -Metadata @{clientid=$ClientID}
+    END {
+
     }
 }
 
@@ -162,7 +207,9 @@ function Get-AcronisTenant {
         [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
         [string]$BaseUri
     )
-
+    BEGIN{}
+    PROCESS{}
+    END{}
 }
 
 function Get-AcronisToken {
@@ -186,7 +233,9 @@ function Get-AcronisToken {
         [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
         [string]$BaseUri
     )
-
+    BEGIN{}
+    PROCESS{}
+    END{}
 }
 
 function Set-AcronisToken {
@@ -210,7 +259,9 @@ function Set-AcronisToken {
         [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
         [string]$BaseUri
     )
-
+    BEGIN{}
+    PROCESS{}
+    END{}
 }
 
 function New-AcronisToken {
@@ -234,7 +285,9 @@ function New-AcronisToken {
         [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
         [string]$BaseUri
     )
-
+    BEGIN{}
+    PROCESS{}
+    END{}
 }
 
 function Find-AcronisClient {
@@ -258,6 +311,12 @@ function Find-AcronisClient {
         [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
         [string]$BaseUri
     )
+    BEGIN{}
+    PROCESS{}
+    END{}
+}
+
+function Get-AcronisApiClient {
 
 }
 
