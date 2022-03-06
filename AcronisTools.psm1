@@ -72,6 +72,70 @@ function New-AcronisSecretVault {
     Register-SecretVault -Name $Name -ModuleName Microsoft.PowerShell.SecretStore 
 }
 
+function New-AcronisSecret {
+    <#
+    .SYNOPSIS
+        Creates a new PowerShell Secret for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name,
+        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Vault,
+        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$ClientID,
+        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$ClientSecret
+    )
+
+    if (-not (Get-SecretVault -Name $Vault -ErrorAction SilentlyContinue)){
+        Write-Warning "Secret Vault ($($Vault)) does not exist. These are the secret vaults available: "
+        Get-SecretVault
+        return
+    }
+    else {
+        Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret -Metadata @{clientid=$ClientID}
+    }
+}
+
+function Set-AcronisSecret {
+    <#
+    .SYNOPSIS
+        Sets a new PowerShell Secret Vault for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name,
+        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Vault,
+        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientID,
+        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [string]$ClientSecret
+    )
+
+    if (-not (Get-SecretVault -Name $Vault -ErrorAction SilentlyContinue)){
+        Write-Warning "Secret Vault ($($Vault)) does not exist. These are the secret vaults available: "
+        Get-SecretVault
+        return
+    }
+    elseif ($ClientID -ne $null -and $ClientSecret -eq $null) {
+        Set-Secret -Vault $Vault -Name $Name -Metadata @{clientid=$ClientID}
+    }
+    elseif ($ClientID -eq $null -and $ClientSecret -ne $null) {
+        Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret
+    }
+    else {
+        Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret -Metadata @{clientid=$ClientID}
+    }
+}
 function Get-AcronisLogins {
     $acronisVault = Read-Host "Please enter Vault name to unlock or type 'new' to create a new vault: "
 
@@ -80,7 +144,7 @@ function Get-AcronisLogins {
     }
     else {
         $vaultName = Read-Host "Please enter a name for your new Acronis Secrets Vault: "
-        $newVault = New-AcronisSecretVault -Name $vaultName
+        New-AcronisSecretVault -Name $vaultName
 
         Get-AcronisSecretVault $vaultName
         $acronisVault = $vaultName
