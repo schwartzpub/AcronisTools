@@ -7,7 +7,7 @@ function Get-AcronisSecretVault {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name
     )
 
@@ -36,7 +36,7 @@ function New-AcronisSecretVault {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name
     )
     BEGIN {}
@@ -55,9 +55,9 @@ function Get-AcronisSecret {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Vault
     )
 
@@ -101,15 +101,15 @@ function New-AcronisSecret {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 2, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 3, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 4, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$BaseUri
     )
 
@@ -136,15 +136,15 @@ function Set-AcronisSecret {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 2, ValueFromPipeline = $true)]
         [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 3, ValueFromPipeline = $true)]
         [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 4, ValueFromPipeline = $true)]
         [string]$BaseUri
     )
     BEGIN {
@@ -195,15 +195,15 @@ function New-AcronisToken {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 2, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 3, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 4, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$BaseUri
     )
 
@@ -250,15 +250,15 @@ function Set-AcronisToken {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 2, ValueFromPipeline = $true)]
         [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 3, ValueFromPipeline = $true)]
         [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 4, ValueFromPipeline = $true)]
         [string]$BaseUri
     )
     BEGIN{}
@@ -275,9 +275,9 @@ function Get-AcronisToken {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Vault
     )
     BEGIN{}
@@ -311,7 +311,7 @@ function Test-AcronisToken {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [PSCustomObject]$Token
     )
 
@@ -336,16 +336,16 @@ function Find-AcronisClient {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
+        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 2, ValueFromPipeline = $true)]
         [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 3, ValueFromPipeline = $true)]
         [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
+        [Parameter(Position = 4, ValueFromPipeline = $true)]
         [string]$BaseUri
     )
     BEGIN{}
