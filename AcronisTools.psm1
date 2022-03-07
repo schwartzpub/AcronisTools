@@ -208,6 +208,8 @@ function New-AcronisToken {
     )
 
     BEGIN{
+        $thisClient = Get-Secret -Name $Name -Vault $Vault
+
         $pair = "${ClientID}:${ClientSecret}"
         $pairBytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
         $pairBase64 = [System.Convert]::ToBase64String($pairBytes)
@@ -248,7 +250,6 @@ function Set-AcronisToken {
     #>
     [CmdletBinding()]
     param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
         [string]$Name,
         [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
