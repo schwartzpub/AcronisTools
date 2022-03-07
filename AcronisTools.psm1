@@ -198,19 +198,14 @@ function New-AcronisToken {
         [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
         [string]$Name,
         [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$BaseUri
+        [string]$Vault
     )
 
     BEGIN{
-        $thisClient = Get-Secret -Name $Name -Vault $Vault
+        $thisClientSecret = Get-Secret -Name $Name -Vault $Vault
+        $thisClientMetadata = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata
 
-        $pair = "${ClientID}:${ClientSecret}"
+        $pair = "${thisClientMetadata.ClientID}:${thisClientSecret}"
         $pairBytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
         $pairBase64 = [System.Convert]::ToBase64String($pairBytes)
 
@@ -221,7 +216,7 @@ function New-AcronisToken {
         $postParams = @{"grant_type" = "client_credentials"}
     }
     PROCESS{
-        $token = Invoke-RestMethod -Method Post -Uri "https://$BaseUri/api/2/idp/token" -Headers $headers -Body $postParams
+        $token = Invoke-RestMethod -Method Post -Uri "https://$($thisClientMetadata.baseuri)/api/2/idp/token" -Headers $headers -Body $postParams
 
         $metadata = @{}
         $metadata['token_type'] = $token.token_type
