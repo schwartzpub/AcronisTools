@@ -217,19 +217,19 @@ function New-AcronisToken {
     }
     PROCESS{
         $token = Invoke-RestMethod -Method Post -Uri "https://$($thisClientMetadata.baseuri)/api/2/idp/token" -Headers $headers -Body $postParams
-
-        $metadata = @{}
-        $metadata['token_type'] = $token.token_type
-        $metadata['expires_in'] = $token.expires_in
-        $metadata['expires_on'] = $token.expires_on
-        $metadata['id_token'] = $token.id_token
-        $metadata['scope'] = $token.scope
     }
     END{
         if ($token.status_code -ne 200){
             return "Error"
         }
         else {
+            $metadata = @{}
+            $metadata['token_type'] = $token.token_type
+            $metadata['expires_in'] = $token.expires_in
+            $metadata['expires_on'] = $token.expires_on
+            $metadata['id_token'] = $token.id_token
+            $metadata['scope'] = $token.scope
+            
             Set-Secret -Name $Name -Vault $Vault -Secret $token.access_token
             Set-SecretInfo -Name $Name -Vault $Vault -Metadata $metadata
         }
