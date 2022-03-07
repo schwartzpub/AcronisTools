@@ -82,9 +82,9 @@ function Get-AcronisSecret {
         else {
             $thisSecret = [PSCustomObject]@{
                 Name = $Name
-                ClientID = (Get-SecretInfo -Name $name).Metadata.clientid
-                ClientSecret = Get-Secret -Name $Name
-                BaseUri = (Get-SecretInfo -Name $name).Metadata.baseuri
+                ClientID = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.clientid
+                ClientSecret = Get-Secret -Name $Name -Vault $Vault
+                BaseUri = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.baseuri
             }
             return $thisSecret
         }
@@ -186,7 +186,60 @@ function Set-AcronisSecret {
     }
 }
 
-function Get-AcronisTenant {
+function New-AcronisToken {
+    <#
+    .SYNOPSIS
+        Sets a new PowerShell Secret Vault for Acronis Secrets.
+    .DESCRIPTION
+        Gets secret used for logging into Acronis.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Name,
+        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$Vault,
+        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$ClientID,
+        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$ClientSecret,
+        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
+        [string]$BaseUri
+    )
+
+    BEGIN{
+        $pair = "${ClientID}:${ClientSecret}"
+        $pairBytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
+        $pairBase64 = [System.Convert]::ToBase64String($pairBytes)
+
+        $basicAuthentication = "Basic $pairBase64"
+        $headers = @{"Authorization"=$basicAuthentication}
+        $headers.Add("Content-Type","applicati0on/x-www-form-urlencoded")
+
+        $postParams = @{"grant_type" = "client_credentials"}
+    }
+    PROCESS{
+        $token = Invoke-RestMethod -Method Post -Uri "https://$BaseUri/api/2/idp/token" -Headers $headers -Body $postParams
+
+        $metadata = @{}
+        $metadata['token_type'] = $token.token_type
+        $metadata['expires_in'] = $token.expires_in
+        $metadata['expires_on'] = $token.expires_on
+        $metadata['id_token'] = $token.id_token
+        $metadata['scope'] = $token.scope
+    }
+    END{
+        if ($token.status_code -ne 200){
+            return "Error"
+        }
+        else {
+            Set-Secret -Name $Name -Vault $Vault -Secret $token.access_token
+            Set-SecretInfo -Name $Name -Vault $Vault -Metadata $metadata
+        }
+    }
+}
+
+function Set-AcronisToken {
     <#
     .SYNOPSIS
         Sets a new PowerShell Secret Vault for Acronis Secrets.
@@ -222,24 +275,34 @@ function Get-AcronisToken {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
         [string]$Name,
         [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$BaseUri
+        [string]$Vault
     )
     BEGIN{}
-    PROCESS{}
+    PROCESS{
+        if (-not (Get-Secret -Vault $Vault -Name $Name -ErrorAction SilentlyContinue)){
+            Write-Warning "SToken ($($Name)) does not exist. These are the tokens available: "
+            Get-SecretInfo -Vault $Vault
+            return
+        }
+        else {
+            $thisToken = [PSCustomObject]@{
+                access_token = Get-Secret -Name $Name -Vault $Vault
+                token_type = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.token_type
+                expires_in = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.expires_in
+                expires_on = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.expires_on
+                id_token = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.id_token
+                scope = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.scope
+            }
+            $thisToken
+        }
+    }
     END{}
 }
 
-function Set-AcronisToken {
-    <#
+function Test-AcronisToken {
+<#
     .SYNOPSIS
         Sets a new PowerShell Secret Vault for Acronis Secrets.
     .DESCRIPTION
@@ -248,46 +311,19 @@ function Set-AcronisToken {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$BaseUri
+        [PSCustomObject]$Token
     )
-    BEGIN{}
-    PROCESS{}
-    END{}
-}
 
-function New-AcronisToken {
-    <#
-    .SYNOPSIS
-        Sets a new PowerShell Secret Vault for Acronis Secrets.
-    .DESCRIPTION
-        Gets secret used for logging into Acronis.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [Parameter(Position = 0, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, ValueFromRemainingArguments = $true, Mandatory = $true)]
-        [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true, ValueFromRemainingArguments = $true)]
-        [string]$BaseUri
-    )
-    BEGIN{}
-    PROCESS{}
-    END{}
+    BEGIN {}
+    PROCESS {
+        $unixTime = $token.expires_on
+
+        $expireOnTime = [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($unixTime))
+        $timeDifference = New-TimeSpan -End $expireOnTime
+
+        $timeDifference.TotalMinutes -gt 15
+    }
+    END {}
 }
 
 function Find-AcronisClient {
