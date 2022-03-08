@@ -202,16 +202,18 @@ function New-AcronisToken {
     )
 
     BEGIN{
-        $thisClientSecret = Get-Secret -Name $Name -Vault $Vault
-        $thisClientMetadata = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata
+        $thisClientSecret = Get-Secret -Name $SecretName -Vault $SecretVault -AsPlainText
+        $thisClientMetadata = (Get-SecretInfo -Name $SecretName -Vault $SecretVault).Metadata
 
-        $pair = "${thisClientMetadata.ClientID}:${thisClientSecret}"
+        $thisClientId = $thisClientMetadata.clientid
+
+        $pair = "${thisClientId}:${thisClientSecret}"
         $pairBytes = [System.Text.Encoding]::ASCII.GetBytes($pair)
         $pairBase64 = [System.Convert]::ToBase64String($pairBytes)
 
         $basicAuthentication = "Basic $pairBase64"
         $headers = @{"Authorization"=$basicAuthentication}
-        $headers.Add("Content-Type","applicati0on/x-www-form-urlencoded")
+        $headers.Add("Content-Type","application/x-www-form-urlencoded")
 
         $postParams = @{"grant_type" = "client_credentials"}
     }
@@ -233,22 +235,25 @@ function New-AcronisClientSearch {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$SecretVault,
-        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$TokenVault
+        [string]$SecretVault
     )
     BEGIN{
+
+    }
+    PROCESS{
         if (-not (Get-SecretVault -Name $SecretVault -ErrorAction SilentlyContinue)){
             Write-Warning "Secret Vault ($($SecretVault)) does not exist. These are the vaults available: "
             Get-SecretVault
         }
-        if (-not (Get-SecretVault -Name $TokenVault -ErrorAction SilentlyContinue)){
-            Write-Warning "Token Vault ($($TokenVault)) does not exist. These are the vaults available: "
-            Get-SecretVault
-        }
-    }
-    PROCESS{
+        else {
+            Get-AcronisSecretVault -Name $SecretVault
+            foreach ($secret in Get-SecretInfo -Vault $SecretVault) {
+                #Get new token
+                $token = New-AcronisToken -SecretName $secret.Name -SecretVault $SecretVault
 
+                #Search tenant
+            }
+        }
     }
     END{
 
