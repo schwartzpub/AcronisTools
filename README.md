@@ -16,3 +16,9 @@ Then, configure your API Client vault.  This will store your Acronis API Client 
 ```powershell
 Register-SecretVault -Name "AcronisCredentials" -ModuleName "Microsoft.PowerShell.SecretStore"
 ```
+## Authentication
+
+### Acronis API Client
+
+### Acronis API Tokens
+Acronis API Tokens will be requested at runtime.  The tokens will not be stored, and will be used for the duration of the process.
