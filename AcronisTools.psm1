@@ -196,9 +196,9 @@ function New-AcronisToken {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Name,
+        [string]$SecretName,
         [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Vault
+        [string]$SecretVault
     )
 
     BEGIN{
@@ -219,24 +219,11 @@ function New-AcronisToken {
         $token = Invoke-RestMethod -Method Post -Uri "https://$($thisClientMetadata.baseuri)/api/2/idp/token" -Headers $headers -Body $postParams
     }
     END{
-        if ($token.status_code -ne 200){
-            return "Error"
-        }
-        else {
-            $metadata = @{}
-            $metadata['token_type'] = $token.token_type
-            $metadata['expires_in'] = $token.expires_in
-            $metadata['expires_on'] = $token.expires_on
-            $metadata['id_token'] = $token.id_token
-            $metadata['scope'] = $token.scope
-            
-            Set-Secret -Name $Name -Vault $Vault -Secret $token.access_token
-            Set-SecretInfo -Name $Name -Vault $Vault -Metadata $metadata
-        }
+        return $token
     }
 }
 
-function Set-AcronisToken {
+function New-AcronisClientSearch {
     <#
     .SYNOPSIS
         Sets a new PowerShell Secret Vault for Acronis Secrets.
@@ -246,110 +233,26 @@ function Set-AcronisToken {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Name,
+        [string]$SecretVault,
         [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true)]
-        [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true)]
-        [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true)]
-        [string]$BaseUri
+        [string]$TokenVault
     )
-    BEGIN{}
-    PROCESS{}
-    END{}
-}
-
-function Get-AcronisToken {
-    <#
-    .SYNOPSIS
-        Sets a new PowerShell Secret Vault for Acronis Secrets.
-    .DESCRIPTION
-        Gets secret used for logging into Acronis.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Vault
-    )
-    BEGIN{}
+    BEGIN{
+        if (-not (Get-SecretVault -Name $SecretVault -ErrorAction SilentlyContinue)){
+            Write-Warning "Secret Vault ($($SecretVault)) does not exist. These are the vaults available: "
+            Get-SecretVault
+        }
+        if (-not (Get-SecretVault -Name $TokenVault -ErrorAction SilentlyContinue)){
+            Write-Warning "Token Vault ($($TokenVault)) does not exist. These are the vaults available: "
+            Get-SecretVault
+        }
+    }
     PROCESS{
-        if (-not (Get-Secret -Vault $Vault -Name $Name -ErrorAction SilentlyContinue)){
-            Write-Warning "SToken ($($Name)) does not exist. These are the tokens available: "
-            Get-SecretInfo -Vault $Vault
-            return
-        }
-        else {
-            $thisToken = [PSCustomObject]@{
-                access_token = Get-Secret -Name $Name -Vault $Vault
-                token_type = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.token_type
-                expires_in = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.expires_in
-                expires_on = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.expires_on
-                id_token = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.id_token
-                scope = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.scope
-            }
-            $thisToken
-        }
+
     }
-    END{}
-}
+    END{
 
-function Test-AcronisToken {
-<#
-    .SYNOPSIS
-        Sets a new PowerShell Secret Vault for Acronis Secrets.
-    .DESCRIPTION
-        Gets secret used for logging into Acronis.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [PSCustomObject]$Token
-    )
-
-    BEGIN {}
-    PROCESS {
-        $unixTime = $token.expires_on
-
-        $expireOnTime = [timezone]::CurrentTimeZone.ToLocalTime(([datetime]'1/1/1970').AddSeconds($unixTime))
-        $timeDifference = New-TimeSpan -End $expireOnTime
-
-        $timeDifference.TotalMinutes -gt 15
     }
-    END {}
-}
-
-function Find-AcronisClient {
-    <#
-    .SYNOPSIS
-        Sets a new PowerShell Secret Vault for Acronis Secrets.
-    .DESCRIPTION
-        Gets secret used for logging into Acronis.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true)]
-        [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true)]
-        [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true)]
-        [string]$BaseUri
-    )
-    BEGIN{}
-    PROCESS{}
-    END{}
-}
-
-function Get-AcronisApiClient {
-
 }
 
 function Get-AcronisLogins {
