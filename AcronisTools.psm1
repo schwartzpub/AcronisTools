@@ -235,7 +235,9 @@ function New-AcronisClientSearch {
     [CmdletBinding()]
     param(
         [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$SecretVault
+        [string]$SecretVault,
+        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
+        [string]$SearchTerm
     )
     BEGIN{
 
@@ -250,31 +252,28 @@ function New-AcronisClientSearch {
             foreach ($secret in Get-SecretInfo -Vault $SecretVault) {
                 #Get new token
                 $token = New-AcronisToken -SecretName $secret.Name -SecretVault $SecretVault
+                $tenantId = $token.scope.Split(":")[3]
 
                 #Search tenant
+                $bearerAuthentication = "Bearer $($token.access_token)"
+                $headers = @{"Authorization"=$bearerAuthentication}
+
+                $getParams = @{"tenant"=$tenantId;"text"=$SearchTerm}
+
+                $result = Invoke-RestMethod -Method Get -Uri "https://$($secret.Metadata.baseuri)/api/2/search" -Headers $headers -Body $getParams
+                
+                if (-not $result.items){
+                    return
+                }
+                else {
+                    foreach ($item in $result.items){
+                        Write-Output "Match found in tenant ($($secret.Name)): $($item.name)"
+                    }
+                }
             }
         }
     }
     END{
 
-    }
-}
-
-function Get-AcronisLogins {
-    $acronisVault = Read-Host "Please enter Vault name to unlock or type 'new' to create a new vault: "
-
-    if ($acronisVault -ne "new"){
-        Get-AcronisSecretVault $acronisVault
-    }
-    else {
-        $vaultName = Read-Host "Please enter a name for your new Acronis Secrets Vault: "
-        New-AcronisSecretVault -Name $vaultName
-
-        Get-AcronisSecretVault $vaultName
-        $acronisVault = $vaultName
-    }
-
-    foreach ($secret in (Get-SecretInfo -Vault $acronisVault)){
-        Get-AcronisSecret -Name $secret.Name -Vault $acronisVault
     }
 }
