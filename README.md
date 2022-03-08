@@ -27,3 +27,7 @@ You can add multiple clients for multiple tenants into the secret vault, which c
 
 ### Acronis API Tokens
 Acronis API Tokens will be requested at runtime.  The tokens will not be stored, and will be used for the duration of the process.
+
+## Usage
+
+### Searching Acronis Tenants for a Client
