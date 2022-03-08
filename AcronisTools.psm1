@@ -27,25 +27,6 @@ function Get-AcronisSecretVault {
     }
 }
 
-function New-AcronisSecretVault {
-    <#
-    .SYNOPSIS
-        Creates a new PowerShell Secret Vault for Acronis Secrets.
-    .DESCRIPTION
-        Gets secret used for logging into Acronis.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Name
-    )
-    BEGIN {}
-    PROCESS {
-        Register-SecretVault -Name $Name -ModuleName Microsoft.PowerShell.SecretStore 
-    }
-    END {}
-}
-
 function Get-AcronisSecret {
     <#
     .SYNOPSIS
@@ -125,65 +106,6 @@ function New-AcronisSecret {
         }
     }
     END {}
-}
-
-function Set-AcronisSecret {
-    <#
-    .SYNOPSIS
-        Sets a new PowerShell Secret Vault for Acronis Secrets.
-    .DESCRIPTION
-        Gets secret used for logging into Acronis.
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Position = 0, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Name,
-        [Parameter(Position = 1, ValueFromPipeline = $true, Mandatory = $true)]
-        [string]$Vault,
-        [Parameter(Position = 2, ValueFromPipeline = $true)]
-        [string]$ClientID,
-        [Parameter(Position = 3, ValueFromPipeline = $true)]
-        [string]$ClientSecret,
-        [Parameter(Position = 4, ValueFromPipeline = $true)]
-        [string]$BaseUri
-    )
-    BEGIN {
-        $metadata = @{}
-        $secret = ''
-
-        if ($PSBoundParameters.ContainsKey('ClientID')){
-            $metadata['clientid'] = $ClientID
-        }
-
-        if ($PSBoundParameters.ContainsKey('BaseUri')){
-            $metadata['baseuri'] = $BaseUri
-        }
-
-        if ($PSBoundParameters.ContainsKey('ClientSecret')){
-            $secret = $ClientSecret
-        }
-    }
-    PROCESS {
-        if (-not (Get-SecretVault -Name $Vault -ErrorAction SilentlyContinue)){
-            Write-Warning "Secret Vault ($($Vault)) does not exist. These are the secret vaults available: "
-            Get-SecretVault
-            return
-        }
-        else {
-            if (-not $metadata -and $clientsecret) {
-                Set-Secret -Vault $Vault -Name $Name -Metadata $metadata
-            }
-            elseif (-not $ClientSecret -and $metadata) {
-                Set-Secret -Vault $Vault -Name $Name -Secret $secret
-            }
-            else {
-                Set-Secret -Vault $Vault -Name $Name -Secret $secret -Metadata $metadata
-            }
-        }
-    }
-    END {
-
-    }
 }
 
 function New-AcronisToken {
