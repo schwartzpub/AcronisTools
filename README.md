@@ -12,8 +12,7 @@ Install-Module -Name "Microsoft.PowerShell.SecretManagement" -AllowPrerelease
 Install-Module -Name "Microsoft.PowerShell.SecretStore" -AllowPrerelease
 ```
 
-Then, configure two vaults.  One will store your Acronis API Client credentials, and one will store your Acronis API Tokens. You can name these whatever you like, the AcronisTools module will ask you to provide the names at runtime.
+Then, configure your API Client vault.  This will store your Acronis API Client credentials. You can name this whatever you like, the AcronisTools module will ask you to provide the name at runtime.
 ```powershell
 Register-SecretVault -Name "AcronisCredentials" -ModuleName "Microsoft.PowerShell.SecretStore"
-Register-SecretVault -Name "AcronisTokens" -ModuleName "Microsoft.PowerShell.SecretStore"
 ```
