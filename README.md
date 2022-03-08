@@ -1,7 +1,7 @@
 # AcronisTools
 Powershell Tools for Acronis.
 
-At its core, this is really just a useful tool to search across all tenants for a specific client.  Since Acronis has limits to how many clients a tenant can house, you may be in a situation where you are responsible for clients across a multitude of tenants.  Sometimes finding the right tenant can be time consuming when done manually, this tool aims to make that process easier.
+At its core, this is really just a useful tool to search across all tenants for a specific client or partner.  Since Acronis has limits to how many clients/partners a tenant can house, you may be in a situation where you are responsible for clients/partners across a multitude of tenants.  Sometimes finding the right tenant can be time consuming when done manually, this tool aims to make that process easier.
 
 ## Prerequisites
 
@@ -25,7 +25,7 @@ You must be issued an [Acronis API Client](https://www.acronis.com/en-us/support
 ```powershell
 New-AcronisSecret -Name <TenantName> -Vault <AcronisSecretVault> -ClientID <AcronisAPIClientID> -BaseUri <AcronisBaseUri> -ClientSecret <AcronisAPIClientSecret>
 ```
-You can add multiple clients for multiple tenants into the secret vault, which can be used to search multiple tenants at the same time.
+You can add multiple API clients for multiple tenants into the secret vault, which can be used to search multiple tenants at the same time.
 
 ### Acronis API Tokens
 Acronis API Tokens will be requested at runtime.  The tokens will not be stored, and will be used for the duration of the process.
@@ -33,8 +33,8 @@ Acronis API Tokens will be requested at runtime.  The tokens will not be stored,
 ## Usage
 
 ### Searching Acronis Tenants for a Client
-To search for a client within your tenants, you will issue the New-AcronisClientSearch command.
+To search for a client/partner within your tenants, you will issue the New-AcronisClientSearch command.
 ```powershell
-New-AcronisClientSearch -SecretVault <AcronisSecretVault>
+New-AcronisClientSearch -SecretVault <AcronisSecretVault> -SearchTerm <ClientName>
 ```
-This will iterate through your tenants stored in the secrets vault and perform a search against the clients in each tenant in order to locate the tenant that houses the client.
+This will iterate through your tenants stored in the secrets vault and perform a search against the clients/partners in each tenant in order to locate the tenant that houses the client/partner that matches your search term.
