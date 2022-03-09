@@ -27,7 +27,7 @@ New-AcronisSecret -Name <TenantName> -Vault <AcronisSecretVault> -ClientID <Acro
 ```
 You can add multiple API clients for multiple tenants into the secret vault, which can be used to search multiple tenants at the same time.
 
-```powershell
+```
 NAME
     New-AcronisSecret
 
