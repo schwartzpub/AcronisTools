@@ -87,7 +87,7 @@ function New-AcronisSecret {
     .PARAMETER BaseUri
         The Base Uri used to authenticate and make API requests to your tenant.  This is typically the domain portion of the URL (eg. dev.acronis.com)
     .EXAMPLE
-        PS> New-AcronisSecret -Name AcronisTenantName -Vault AcronisVault -ClientID 962f8b0e-9f4f-11ec-b909-0242ac120002 -ClientSecret 1a474d9a50074b14b8288ca0b62573e -BaseUri us5-cloud.acronis.com
+        PS> New-AcronisSecret -Name AcronisTenantName -Vault AcronisVault -ClientID <clientid> -ClientSecret <clientsecret> -BaseUri us5-cloud.acronis.com
     #>
     [CmdletBinding()]
     param(
