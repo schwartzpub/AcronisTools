@@ -62,17 +62,6 @@ PARAMETERS
     -BaseUri <String>
         The Base Uri used to authenticate and make API requests to your tenant.  This is typically the domain portion
         of the URL (eg. dev.acronis.com)
-
-    <CommonParameters>
-        This cmdlet supports the common parameters: Verbose, Debug,
-        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
-        OutBuffer, PipelineVariable, and OutVariable. For more information, see
-        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216).
-
-    -------------------------- EXAMPLE 1 --------------------------
-
-    PS>New-AcronisSecret -Name AcronisTenantName -Vault AcronisVault -ClientID 962f8b0e-9f4f-11ec-b909-0242ac120002
-    -ClientSecret 1a474d9a50074b14b8288ca0b62573e -BaseUri us5-cloud.acronis.com
 ```
 
 ### Acronis API Tokens
