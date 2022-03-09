@@ -69,7 +69,7 @@ Acronis API Tokens will be requested at runtime.  The tokens will not be stored,
 
 ## Usage
 
-### Searching Acronis Tenants for a Client
+### Searching Acronis Tenants for a Client or Partner
 To search for a client/partner within your tenants, you will issue the New-AcronisClientSearch command.
 ```powershell
 New-AcronisClientSearch -SecretVault <AcronisSecretVault> -SearchTerm <ClientName>
