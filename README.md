@@ -75,3 +75,30 @@ To search for a client/partner within your tenants, you will issue the New-Acron
 New-AcronisClientSearch -SecretVault <AcronisSecretVault> -SearchTerm <ClientName>
 ```
 This will iterate through your tenants stored in the secrets vault and perform a search against the clients/partners in each tenant in order to locate the tenant that houses the client/partner that matches your search term.
+
+```
+NAME
+    New-AcronisClientSearch
+
+SYNOPSIS
+    Performs a new search using credentials stored in the supplied Secret Vault.
+
+
+SYNTAX
+    New-AcronisClientSearch [-SecretVault] <String> [-SearchTerm] <String> [<CommonParameters>]
+
+
+DESCRIPTION
+    Performs a new search using credentials stored in the supplied Secret Vault.
+    Must supply the name of your Acronis API Client Secret Vault as well as the search term you wish to use.
+
+
+PARAMETERS
+    -SecretVault <String>
+        Specifies the name of the Acronis API Client Secret Vault, typically this vault only contains secrets and
+        metadata used for the Acronis Tools solution.
+
+    -SearchTerm <String>
+        The keyword(s) you would like to search for.  This will be used to search for matches in client/partner names
+        across all tenants you have stored in your secret vault.
+```
