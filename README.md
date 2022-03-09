@@ -27,6 +27,54 @@ New-AcronisSecret -Name <TenantName> -Vault <AcronisSecretVault> -ClientID <Acro
 ```
 You can add multiple API clients for multiple tenants into the secret vault, which can be used to search multiple tenants at the same time.
 
+```powershell
+NAME
+    New-AcronisSecret
+
+SYNOPSIS
+    Creates a new Secret in the Microsoft Secret Store for Acronis API Clients.
+
+
+SYNTAX
+    New-AcronisSecret [-Name] <String> [-Vault] <String> [-ClientID] <String> [-ClientSecret] <String> [-BaseUri]
+    <String> [<CommonParameters>]
+
+
+DESCRIPTION
+    Creates a new Secret in the Microsoft Secret Store for Acronis API Clients.
+    Takes several required strings, including metadata to accompany the login.
+
+
+PARAMETERS
+    -Name <String>
+        Specifies the name of the Secret, typically this will be an recognizable identifier for the tenant.
+
+    -Vault <String>
+        Specifies the name of the Vault to store the secret.  This is typically a unique Vault used for storing
+        Acronis Tools API Client Secrets.
+
+    -ClientID <String>
+        The UUID of the Acronis API Client issued for API access to your Acronis Tenant.
+
+    -ClientSecret <String>
+        The Client Secret issued with your Acronis API Client ID for API access to your Acronis Tenant.
+
+    -BaseUri <String>
+        The Base Uri used to authenticate and make API requests to your tenant.  This is typically the domain portion
+        of the URL (eg. dev.acronis.com)
+
+    <CommonParameters>
+        This cmdlet supports the common parameters: Verbose, Debug,
+        ErrorAction, ErrorVariable, WarningAction, WarningVariable,
+        OutBuffer, PipelineVariable, and OutVariable. For more information, see
+        about_CommonParameters (https:/go.microsoft.com/fwlink/?LinkID=113216).
+
+    -------------------------- EXAMPLE 1 --------------------------
+
+    PS>New-AcronisSecret -Name AcronisTenantName -Vault AcronisVault -ClientID 962f8b0e-9f4f-11ec-b909-0242ac120002
+    -ClientSecret 1a474d9a50074b14b8288ca0b62573e -BaseUri us5-cloud.acronis.com
+```
+
 ### Acronis API Tokens
 Acronis API Tokens will be requested at runtime.  The tokens will not be stored, and will be used for the duration of the process.
 
