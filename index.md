@@ -8,7 +8,7 @@ This can lead to quite a headache when it comes to providing support as the numb
 Thankfully Acronis has provided an API that can be used to perform a variety of functions on tenants.  In my case, I just needed a reliable (and fast!) way to find out which of the Acronis tenants the partner or client resided in.
 
 ## The Solution
-Here is where (Acronis Tools)[https://github.com/schwartzpub/AcronisTools] comes in.
+Here is where [Acronis Tools](https://github.com/schwartzpub/AcronisTools) comes in.
 
 I thought I'd have some fun and learn a little about the Acronis API while simultaneously learning a bit more about the [Microsoft Secret Store](https://devblogs.microsoft.com/powershell/secretmanagement-and-secretstore-are-generally-available/) in PowerShell.  
 
