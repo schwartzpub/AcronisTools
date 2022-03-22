@@ -194,7 +194,7 @@ function New-AcronisClientSearch {
             }
             else {
                 foreach ($item in $result.items){
-                    Write-Output "Match found in tenant ($($secret.Name)): $($item.name)"
+                    Write-Output "Match found in tenant ($($secret.Name)) with Uri ($($secret.Metadata.baseuri)): $($item.name)"
                 }
             }
         }
