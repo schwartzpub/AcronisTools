@@ -12,13 +12,14 @@ function Get-AcronisSecretVault {
     )
 
     BEGIN {
-        if (-not (Get-SecretVault -Name $Name -ErrorAction SilentlyContinue)){
+        $vault = Get-SecretVault -Name $Name -ErrorAction SilentlyContinue
+        if (-not $vault){
             Write-Warning "Secret Vault ($($Name)) does not exist. These are the secret vaults available: "
             Get-SecretVault
         }
     }
     PROCESS {
-        if ((Get-SecretVault -Name $Name -ErrorAction SilentlyContinue)){
+        if ($vault){
             Unlock-SecretVault -Name $Name
         }
     }
@@ -42,31 +43,32 @@ function Get-AcronisSecret {
         [string]$Vault
     )
 
-    if (-not (Get-Secret -Vault $Vault -Name $Name -ErrorAction SilentlyContinue)){
+    $secretValue = Get-Secret -Vault $Vault -Name $Name -ErrorAction SilentlyContinue
+    if (-not $secretValue){
         Write-Warning "Secret ($($Name)) does not exist. These are the secrets available: "
         Get-SecretInfo -Vault $Vault
         return
     }
 
-    if ($null -eq (Get-SecretInfo -Name $Name).Metadata.clientid){
+    $secretInfo = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata
+
+    if ($null -eq $secretInfo.clientid){
         Write-Warning "Secret ($($Name)) does not contain a client id and cannot be used to access Acronis API. Please ensure your secret contains the metadata for clientid."
         return
     }
 
-    if ($null -eq (Get-SecretInfo -Name $Name).Metadata.baseuri){
+    if ($null -eq $secretInfo.baseuri){
         Write-Warning "Secret ($($Name)) does not contain a Base Uri and cannot be used to access Acronis API. Please ensure your secret contains the metadata for Base Uri."
         return
     }
 
-    else {
-        $thisSecret = [PSCustomObject]@{
-            Name = $Name
-            ClientID = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.clientid
-            ClientSecret = Get-Secret -Name $Name -Vault $Vault
-            BaseUri = (Get-SecretInfo -Name $Name -Vault $Vault).Metadata.baseuri
-        }
-        return $thisSecret
+    $thisSecret = [PSCustomObject]@{
+        Name = $Name
+        ClientID = $secretInfo.clientid
+        ClientSecret = $secretValue
+        BaseUri = $secretInfo.baseuri
     }
+    return $thisSecret
 }
 
 function New-AcronisSecret {
@@ -108,17 +110,16 @@ function New-AcronisSecret {
         Get-SecretVault
         return
     }
-    else {
-        Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret -Metadata @{clientid=$ClientID;baseuri=$BaseUri}
-    }
+
+    Set-Secret -Vault $Vault -Name $Name -Secret $ClientSecret -Metadata @{clientid=$ClientID;baseuri=$BaseUri}
 }
 
 function New-AcronisToken {
     <#
     .SYNOPSIS
-        Sets a new PowerShell Secret Vault for Acronis Secrets.
+        Generates a new OAuth2 token for an Acronis API Client.
     .DESCRIPTION
-        Gets secret used for logging into Acronis.
+        Generates a new OAuth2 token using the client credentials stored in the specified secret vault.
     #>
     [CmdletBinding()]
     param(
@@ -173,30 +174,29 @@ function New-AcronisClientSearch {
     if (-not (Get-SecretVault -Name $SecretVault -ErrorAction SilentlyContinue)){
         Write-Warning "Secret Vault ($($SecretVault)) does not exist. These are the vaults available: "
         Get-SecretVault
+        return
     }
-    else {
-        Get-AcronisSecretVault -Name $SecretVault
-        foreach ($secret in Get-SecretInfo -Vault $SecretVault) {
-            #Get new token
-            $token = New-AcronisToken -SecretName $secret.Name -SecretVault $SecretVault
-            $tenantId = $token.scope.Split(":")[3]
 
-            #Search tenant
-            $bearerAuthentication = "Bearer $($token.access_token)"
-            $headers = @{"Authorization"=$bearerAuthentication}
+    Get-AcronisSecretVault -Name $SecretVault
+    foreach ($secret in Get-SecretInfo -Vault $SecretVault) {
+        #Get new token
+        $token = New-AcronisToken -SecretName $secret.Name -SecretVault $SecretVault
+        $tenantId = $token.scope.Split(":")[3]
 
-            $getParams = @{"tenant"=$tenantId;"text"=$SearchTerm}
+        #Search tenant
+        $bearerAuthentication = "Bearer $($token.access_token)"
+        $headers = @{"Authorization"=$bearerAuthentication}
 
-            $result = Invoke-RestMethod -Method Get -Uri "https://$($secret.Metadata.baseuri)/api/2/search" -Headers $headers -Body $getParams
-            
-            if (-not $result.items){
-                continue
-            }
-            else {
-                foreach ($item in $result.items){
-                    Write-Output "Match found in tenant ($($secret.Name)) with Uri ($($secret.Metadata.baseuri)): $($item.name)"
-                }
-            }
+        $getParams = @{"tenant"=$tenantId;"text"=$SearchTerm}
+
+        $result = Invoke-RestMethod -Method Get -Uri "https://$($secret.Metadata.baseuri)/api/2/search" -Headers $headers -Body $getParams
+
+        if (-not $result.items){
+            continue
+        }
+
+        foreach ($item in $result.items){
+            Write-Output "Match found in tenant ($($secret.Name)) with Uri ($($secret.Metadata.baseuri)): $($item.name)"
         }
     }
 }
